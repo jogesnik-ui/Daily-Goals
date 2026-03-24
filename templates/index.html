@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lockd</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="topbar">
+        <h1 class="brand">Lockd</h1>
+    </header>
+
+    <main class="main">
+
+        <div class="table-wrapper">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Task</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Points</th>
+                        <th>Done</th>
+                        <th>Created Date</th>
+                        <th>Mark As Done</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr class="{{ 'row-done' if task['done'] }}">
+                        <td>{{ task['id'] }}</td>
+                        <td>{{ task['task'] }}</td>
+                        <td>{{ task['description'] }}</td>
+                        <td>{{ task['category'] }}</td>
+                        <td>{{ task['points'] }}</td>
+                        <td>
+                            <span class="status-badge {{ 'done' if task['done'] else 'pending' }}">
+                                {{ 'Done' if task['done'] else 'Pending' }}
+                            </span>
+                        </td>
+                        <td>{{ task['created_date'] }}</td>
+                        <td>
+                            {% if not task['done'] %}
+                            <form method="POST" action="/complete">
+                                <input type="hidden" name="id" value="{{ task['id'] }}">
+                                <button type="submit" class="btn-complete">✓ Done</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="/delete">
+                                <input type="hidden" name="id" value="{{ task['id'] }}">
+                                <button type="submit" class="btn-delete">✕ Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="empty">No tasks yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="points-display">
+            <span class="points-label">Total Points</span>
+            <span class="points-value">{{ total_points }}</span>
+        </div>
+
+        <div class="table-wrapper streak-table-wrapper">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Current Streak</th>
+                        <th>Last Completion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if streak %}
+                    <tr>
+                        <td>{{ streak['id'] }}</td>
+                        <td>{{ streak['current_streak'] }}</td>
+                        <td>{{ streak['last_completion'] or '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="empty">No streak data yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-container">
+            <h2>Add Task</h2>
+            <form action="/add" method="POST">
+                <input type="text" name="task" placeholder="Subject" required>
+                <input type="text" name="description" placeholder="Description">
+                <input type="text" name="category" placeholder="Category">
+                <button type="submit" class="btn-submit">Add Task</button>
+            </form>
+        </div>
+
+    </main>
+
+</body>
+</html>
