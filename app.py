@@ -48,7 +48,8 @@ def init_db():
 def index():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks")
+    today = date.today().isoformat()
+    cursor.execute("SELECT * FROM tasks WHERE created_date = ?", (today,))
     tasks = cursor.fetchall()
     cursor.execute("SELECT * FROM streaks WHERE id = 1")
     streak = cursor.fetchone()
@@ -56,8 +57,16 @@ def index():
     total_points = cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1").fetchone()[0] or 0
 
 
+    done = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = ? AND done = 1" , (today,)).fetchone()[0]
+    total = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = ? ", (today,)).fetchone()[0]
 
-    return render_template("index.html", tasks=tasks, streak=streak, total_points=total_points)
+    percentage = round((done / total) * 100) if total != 0 else 0 
+
+
+
+    return render_template("index.html", tasks=tasks, streak=streak, total_points=total_points, percentage=percentage)
+
+
 
 
 
