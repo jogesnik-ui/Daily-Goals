@@ -112,6 +112,15 @@
             <span class="points-label">Today's Completion</span>
             <span class="points-value">{{ percentage }}%</span>
         </div>
+
+        <div class="nudge-section">
+            <form action="/nudge" method="GET">
+                <button type="submit" class="btn-nudge">⚡ Get Daily Nudge</button>
+            </form>
+            {% if priority %}
+            <p class="nudge-text">{{ priority }}</p>
+            {% endif %}
+        </div>
     </main>
 
 </body>

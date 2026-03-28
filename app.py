@@ -85,6 +85,40 @@ Return JSON only, no other text, no markdown code blocks:
     data = json.loads(response.text)
     return data["points"]
 
+def format_tasks(tasks):
+    task_list = []
+    for task in tasks:
+        if not task['done']:
+            task_list.append(f"{task['task']} - {task['description']}")
+    return "\n".join(task_list)
+
+def get_daily_recommendation(tasks):
+    formatted = format_tasks(tasks)
+    chat = client.chats.create(model="gemini-2.5-flash")
+    response = chat.send_message(
+        f"These are my tasks for today:\n{formatted}\nWhich should I focus on first and why? Plain text, 3 sentences, no markdown."
+    )
+    return response.text
+
+@app.route("/nudge")
+def nudge():
+    conn = get_db()
+    cursor = conn.cursor()
+    today = date.today().isoformat()
+    cursor.execute("SELECT * FROM tasks WHERE created_date = ?", (today,))
+    tasks = cursor.fetchall()
+    cursor.execute("SELECT * FROM streaks WHERE id = 1")
+    streak = cursor.fetchone()
+    total_points = cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1").fetchone()[0] or 0
+    done = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = ? AND done = 1" , (today,)).fetchone()[0]
+    total = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = ? ", (today,)).fetchone()[0]
+
+    percentage = round((done / total) * 100) if total != 0 else 0 
+    conn.close()
+    priority = get_daily_recommendation(tasks)
+    return render_template('index.html', tasks=tasks, priority=priority, streak = streak, total_points = total_points, percentage = percentage)
+
+
 @app.route("/add", methods=['POST'])
 def add_task():
     today = date.today().isoformat()
