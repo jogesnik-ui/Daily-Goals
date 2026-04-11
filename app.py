@@ -110,7 +110,7 @@ def login():
         conn.close()
         error = None
         if user:
-            stored_pw = user["password"]
+            stored_pw = bytes(user["password"])
             if bcrypt.checkpw(password.encode("utf-8"), stored_pw):
                 session["user_id"] = user["id"]
                 session["username"] = user["username"]
