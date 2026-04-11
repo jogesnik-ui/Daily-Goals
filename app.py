@@ -25,9 +25,16 @@ def init_db():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+                   id SERIAL PRIMARY KEY ,
+                   username TEXT UNIQUE NOT NULL,
+                   password BYTEA NOT NULL)
+                   """)
+
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
         user_id INTEGER,
-        id INTEGER PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         task TEXT,
         description TEXT,
         category TEXT,
@@ -39,7 +46,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS streaks (
                    user_id INTEGER UNIQUE,
-                   id INTEGER PRIMARY KEY,
+                   id SERIAL PRIMARY KEY,
                    current_streak INTEGER DEFAULT 0,
                    last_completion TEXT,
                    FOREIGN KEY (user_id) REFERENCES users(id)
@@ -48,12 +55,7 @@ def init_db():
                    """)
 
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-                   id SERIAL PRIMARY KEY ,
-                   username TEXT UNIQUE NOT NULL,
-                   password BYTEA NOT NULL)
-                   """)
+
     conn.commit()
     conn.close()
 
