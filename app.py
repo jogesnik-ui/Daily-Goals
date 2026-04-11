@@ -133,12 +133,14 @@ def index():
     cursor.execute("SELECT * FROM streaks WHERE user_id = %s", (session["user_id"],))
     streak = cursor.fetchone()
 
-    total_points = cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1 AND user_id = %s", (session["user_id"], )).fetchone()[0] or 0
+    cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1 AND user_id = %s", (session["user_id"], ))
+    total_points = cursor.fetchone()[0] or 0
 
 
-    done = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"], )).fetchone()[0]
-    total = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],)).fetchone()[0]
-
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"], ))
+    done = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],))
+    total = cursor.fetchone()[0]
     percentage = round((done / total) * 100) if total != 0 else 0 
 
 
@@ -190,9 +192,12 @@ def nudge():
     tasks = cursor.fetchall()
     cursor.execute("SELECT * FROM streaks WHERE user_id=%s", (session["user_id"],))
     streak = cursor.fetchone()
-    total_points = cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1 AND user_id = %s", (session["user_id"],)).fetchone()[0] or 0
-    done = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"],)).fetchone()[0]
-    total = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],)).fetchone()[0]
+    cursor.execute(" SELECT SUM(points) FROM tasks WHERE done = 1 AND user_id = %s", (session["user_id"],))
+    total_points = cursor.fetchone()[0] or 0
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"],))
+    done = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],))
+    total = cursor.fetchone()[0]
 
     percentage = round((done / total) * 100) if total != 0 else 0 
     conn.close()
@@ -220,8 +225,10 @@ def add_task():
 
 def check_streak(conn, cursor):
     today = date.today().isoformat()
-    done = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"],)).fetchone()[0]
-    total = cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],)).fetchone()[0]
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND done = 1 AND user_id = %s" , (today, session["user_id"],))
+    done = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT (*) FROM tasks WHERE created_date = %s AND user_id = %s", (today, session["user_id"],))
+    total = cursor.fetchone()[0]
 
     if total == 0:
         return
