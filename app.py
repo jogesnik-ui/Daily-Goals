@@ -233,9 +233,10 @@ def check_streak(conn, cursor):
     if total == 0:
         return
     if done/total >= 0.8:
-        streak = cursor.execute("SELECT *  FROM streaks WHERE user_id = %s", 
+        cursor.execute("SELECT *  FROM streaks WHERE user_id = %s", 
                                 (session["user_id"],)
-                                ).fetchone()
+                                )
+        streak = cursor.fetchone()
         last = streak['last_completion']
         current = streak['current_streak']
         print(f"Total:{total}, Done:{done}")
