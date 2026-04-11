@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Lockd</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="auth-card">
+        <h1 class="brand">Lockd</h1>
+        <p class="auth-subtitle">Sign in to your account</p>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <p class="flash-msg">{{ messages[0] }}</p>
+        {% endif %}
+        {% endwith %}
+
+        <form class="auth-form" method="POST">
+            <input name="username" placeholder="Username" required>
+            <input name="password" type="password" placeholder="Password" required>
+            {%if error %}
+            <p class="error-msg">{{error}}</p> 
+            {% endif %}
+            <button type="submit" class="btn-auth">Login</button>
+
+        </form>
+
+        <p class="auth-footer">Don't have an account? <a href="/register">Register</a></p>
+
+    </div>
+
+</body>
+</html>

@@ -16,112 +16,107 @@
 
     <main class="main">
 
-        <div class="table-wrapper">
-            <table class="task-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Task</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Points</th>
-                        <th>Done</th>
-                        <th>Created Date</th>
-                        <th>Mark As Done</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for task in tasks %}
-                    <tr class="{{ 'row-done' if task['done'] }}">
-                        <td>{{ task['id'] }}</td>
-                        <td>{{ task['task'] }}</td>
-                        <td>{{ task['description'] }}</td>
-                        <td>{{ task['category'] }}</td>
-                        <td>{{ task['points'] }}</td>
-                        <td>
-                            <span class="status-badge {{ 'done' if task['done'] else 'pending' }}">
-                                {{ 'Done' if task['done'] else 'Pending' }}
-                            </span>
-                        </td>
-                        <td>{{ task['created_date'] }}</td>
-                        <td>
-                            {% if not task['done'] %}
-                            <form method="POST" action="/complete">
-                                <input type="hidden" name="id" value="{{ task['id'] }}">
-                                <button type="submit" class="btn-complete">✓ Done</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <form method="POST" action="/delete">
-                                <input type="hidden" name="id" value="{{ task['id'] }}">
-                                <button type="submit" class="btn-delete">✕ Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="9" class="empty">No tasks yet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <span class="stat-label">Total Points</span>
+                <span class="stat-value">{{ total_points }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Today's Completion</span>
+                <span class="stat-value">{{ percentage }}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Current Streak</span>
+                <span class="stat-value">{{ streak['current_streak'] if streak else 0 }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Last Completion</span>
+                <span class="stat-value stat-value--sm">{{ streak['last_completion'] if streak and streak['last_completion'] else '—' }}</span>
+            </div>
         </div>
 
-        <div class="points-display">
-            <span class="points-label">Total Points</span>
-            <span class="points-value">{{ total_points }}</span>
-        </div>
+        <!-- Main content grid -->
+        <div class="content-grid">
 
-        <div class="table-wrapper streak-table-wrapper">
-            <table class="task-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Current Streak</th>
-                        <th>Last Completion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if streak %}
-                    <tr>
-                        <td>{{ streak['id'] }}</td>
-                        <td>{{ streak['current_streak'] }}</td>
-                        <td>{{ streak['last_completion'] or '—' }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" class="empty">No streak data yet.</td>
-                    </tr>
+            <!-- Tasks table -->
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <h2>Today's Tasks</h2>
+                </div>
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Points</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr class="{{ 'row-done' if task['done'] }}">
+                            <td class="td-task">{{ task['task'] }}</td>
+                            <td>{{ task['description'] }}</td>
+                            <td><span class="category-tag">{{ task['category'] }}</span></td>
+                            <td class="td-points">{{ task['points'] }}</td>
+                            <td>
+                                <span class="status-badge {{ 'done' if task['done'] else 'pending' }}">
+                                    {{ 'Done' if task['done'] else 'Pending' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    {% if not task['done'] %}
+                                    <form method="POST" action="/complete">
+                                        <input type="hidden" name="id" value="{{ task['id'] }}">
+                                        <button type="submit" class="btn-complete">✓</button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="POST" action="/delete">
+                                        <input type="hidden" name="id" value="{{ task['id'] }}">
+                                        <button type="submit" class="btn-delete">✕</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="empty">No tasks yet. Add one to get started.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="form-container">
+                    <h2>Add Task</h2>
+                    <form action="/add" method="POST">
+                        <input type="text" name="task" placeholder="Subject" required>
+                        <input type="text" name="description" placeholder="Description">
+                        <input type="text" name="category" placeholder="Category">
+                        <button type="submit" class="btn-submit">Add Task</button>
+                    </form>
+                </div>
+
+                <div class="nudge-section">
+                    <h2>Daily Nudge</h2>
+                    <form action="/nudge" method="GET">
+                        <button type="submit" class="btn-nudge">⚡ Get Recommendation</button>
+                    </form>
+                    {% if priority %}
+                    <p class="nudge-text">{{ priority }}</p>
                     {% endif %}
-                </tbody>
-            </table>
+                </div>
+            </div>
+
         </div>
 
-        <div class="form-container">
-            <h2>Add Task</h2>
-            <form action="/add" method="POST">
-                <input type="text" name="task" placeholder="Subject" required>
-                <input type="text" name="description" placeholder="Description">
-                <input type="text" name="category" placeholder="Category">
-                <button type="submit" class="btn-submit">Add Task</button>
-            </form>
-        </div>
-        <div class="points-display" style="margin-top: 16px;">
-            <span class="points-label">Today's Completion</span>
-            <span class="points-value">{{ percentage }}%</span>
-        </div>
-
-        <div class="nudge-section">
-            <form action="/nudge" method="GET">
-                <button type="submit" class="btn-nudge">⚡ Get Daily Nudge</button>
-            </form>
-            {% if priority %}
-            <p class="nudge-text">{{ priority }}</p>
-            {% endif %}
-        </div>
     </main>
-
+    <a href="/logout" class="logout-footer">Logout</a>
 </body>
 </html>
